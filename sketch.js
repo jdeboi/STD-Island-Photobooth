@@ -17,6 +17,8 @@ let mpReady = false;
 let captureFrame = null;
 
 let pulseT = 0;
+let countdown = 0;
+let pendingCapture = false;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function drawImageCover(p, img, x, y, w, h) {
@@ -62,12 +64,47 @@ new p5(function (p) {
 
     // ── HUD overlays ─────────────────────────────────────────────────────
     drawBottomBar(p);
+
+    // ── Capture on clean frame ────────────────────────────────────────────
+    if (pendingCapture) {
+      pendingCapture = false;
+      captureFrame = p.get();
+      uploadAndShow(captureFrame);
+      return;
+    }
+
+    // ── Countdown overlay ─────────────────────────────────────────────────
+    if (countdown > 0) {
+      p.fill(0, 0, 0, 100);
+      p.noStroke();
+      p.rect(0, 0, W, H);
+
+      p.textFont('Bebas Neue');
+      p.textSize(200);
+      p.textAlign(p.CENTER, p.CENTER);
+      p.fill(255, 255, 255, 230);
+      p.text(countdown, W / 2, H / 2 - 20);
+    }
   };
 
   // ── Capture ───────────────────────────────────────────────────────────────
   document.getElementById('capture-btn').addEventListener('click', () => {
-    captureFrame = p.get();
-    uploadAndShow(captureFrame);
+    if (countdown > 0) return;
+    countdown = 3;
+    captureBtn.disabled = true;
+    captureBtn.textContent = '3…';
+
+    const tick = () => {
+      countdown--;
+      if (countdown <= 0) {
+        countdown = 0;
+        pendingCapture = true;
+      } else {
+        captureBtn.textContent = countdown + '…';
+        setTimeout(tick, 1000);
+      }
+    };
+    setTimeout(tick, 1000);
   });
 
 });
@@ -81,12 +118,6 @@ function drawBottomBar(p) {
   p.noStroke();
   p.fill(0, 0, 0, 170);
   p.rect(0, barY, W, barH);
-
-  // Pink vertical divider
-  p.stroke(232, 60, 130, 220);
-  p.strokeWeight(1.5);
-  p.line(100, barY + 12, 100, H - 12);
-  p.noStroke();
 
   // Left block: SATSUMA
   p.textAlign(p.LEFT, p.TOP);
@@ -102,6 +133,15 @@ function drawBottomBar(p) {
   p.fill(0, 212, 184, 210);
   p.text('TECHNOLOGY\nDYNAMICS', 14, barY + 44);
   p.textStyle(p.NORMAL);
+
+  // Pink vertical divider — flush against SATSUMA text
+  p.textFont('Bebas Neue');
+  p.textSize(30);
+  const divX = 14 + p.textWidth('SATSUMA') + 22;
+  p.stroke(232, 60, 130, 220);
+  p.strokeWeight(1.5);
+  p.line(divX, barY + 12, divX, H - 12);
+  p.noStroke();
 
   // Center title — measure both parts for centering
   p.textFont('Bebas Neue');
