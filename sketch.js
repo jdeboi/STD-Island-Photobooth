@@ -210,12 +210,22 @@ function initMediaPipe() {
     }
 
     // Draw segmented person onto offscreen canvas
+    // Cover-scale the source to avoid stretching on mobile cameras
+    const src = results.image;
+    const sw = src.videoWidth || src.width;
+    const sh = src.videoHeight || src.height;
+    const scale = Math.max(W / sw, H / sh);
+    const dx = (W - sw * scale) / 2;
+    const dy = (H - sh * scale) / 2;
+    const dw = sw * scale;
+    const dh = sh * scale;
+
     segCtx.clearRect(0, 0, W, H);
-    segCtx.drawImage(results.segmentationMask, 0, 0, W, H);
+    segCtx.drawImage(results.segmentationMask, dx, dy, dw, dh);
 
     // Keep only the person pixels
     segCtx.globalCompositeOperation = 'source-in';
-    segCtx.drawImage(results.image, 0, 0, W, H);
+    segCtx.drawImage(results.image, dx, dy, dw, dh);
     segCtx.globalCompositeOperation = 'source-over';
 
     // Convert to p5 image
