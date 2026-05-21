@@ -1,0 +1,17 @@
+{
+  "name": "island-photobooth",
+  "version": "1.0.0",
+  "description": "AI Executive Presence Portrait photo booth",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.600.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "uuid": "^10.0.0"
+  }
+}

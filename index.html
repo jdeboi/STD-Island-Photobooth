@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI-Optimized Executive Presence Portrait™</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Great+Vibes&display=swap" rel="stylesheet" />
+
+  <!-- p5.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+  <!-- MediaPipe Selfie Segmentation -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <!-- QR Code -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div id="stage-wrapper">
+      <div id="canvas-container"></div>
+
+      <div id="controls">
+        <div id="bg-selector">
+          <span class="label">Background</span>
+          <div id="bg-thumbs"></div>
+        </div>
+        <button id="capture-btn">
+          <span class="icon">&#9679;</span> Capture Portrait
+        </button>
+      </div>
+    </div>
+
+    <!-- Result modal -->
+    <div id="result-modal" class="hidden">
+      <div id="result-inner">
+        <h2>Your AI-Optimized Executive Presence Portrait™</h2>
+        <img id="result-img" alt="Your portrait" />
+        <div id="qr-container">
+          <p class="qr-label" id="qr-status">Uploading…</p>
+          <div id="qr-code"></div>
+        </div>
+        <div id="modal-actions">
+          <a id="download-btn" download="executive-portrait.png">Save Portrait</a>
+          <button id="retake-btn">Retake</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="loading-screen">
+      <div class="spinner"></div>
+      <p>Initializing AI Leadership Modules…</p>
+    </div>
+  </div>
+
+  <!-- hidden video element for MediaPipe -->
+  <video id="input-video" playsinline style="display:none"></video>
+  <!-- hidden canvas for segmentation output -->
+  <canvas id="seg-canvas" style="display:none"></canvas>
+
+  <script src="sketch.js"></script>
+</body>
+</html>
