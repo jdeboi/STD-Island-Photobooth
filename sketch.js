@@ -289,7 +289,6 @@ async function uploadAndShow(pg) {
 
 function showResult(dataURL, s3Url) {
   document.getElementById('result-img').src = dataURL;
-  document.getElementById('download-btn').href = s3Url || dataURL;
   document.getElementById('qr-code').innerHTML = '';
   document.getElementById('qr-status').textContent = 'Uploading…';
   document.getElementById('result-modal').classList.remove('hidden');
@@ -310,10 +309,13 @@ function renderQR(url) {
   });
 }
 
-document.getElementById('retake-btn').addEventListener('click', () => {
+function closeModal() {
   document.getElementById('result-modal').classList.add('hidden');
   document.getElementById('qr-code').innerHTML = '';
-});
+}
+
+document.getElementById('done-btn').addEventListener('click', closeModal);
+document.getElementById('retake-btn').addEventListener('click', closeModal);
 
 // ── Thumbnail selector ────────────────────────────────────────────────────────
 function buildBgThumbs(p) {

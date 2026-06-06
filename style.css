@@ -164,17 +164,18 @@ body {
   display: flex;
   gap: 14px;
 }
-#download-btn {
+#done-btn {
   background: var(--accent);
   color: #fff;
+  border: none;
   border-radius: 30px;
   padding: 10px 28px;
   font-weight: 700;
-  text-decoration: none;
   font-size: 0.9rem;
+  cursor: pointer;
   transition: background 0.2s;
 }
-#download-btn:hover { background: #c73652; }
+#done-btn:hover { background: #c73652; }
 #retake-btn {
   background: transparent;
   color: var(--light);
