@@ -276,7 +276,6 @@ async function uploadAndShow(pg) {
     if (!res.ok) throw new Error(`Server error ${res.status}`);
     const { url } = await res.json();
     renderQR(url);
-    document.getElementById('download-btn').href = url;
   } catch (err) {
     console.error('Upload failed:', err);
     // Fall back to QR that links to the local page

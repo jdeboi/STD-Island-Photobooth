@@ -47,7 +47,9 @@ body {
   border-radius: 12px;
   box-shadow: 0 0 40px rgba(233,69,96,0.3);
   max-width: 100% !important;
+  max-height: calc(100svh - 200px) !important;
   height: auto !important;
+  width: auto !important;
   aspect-ratio: 4 / 3;
   display: block;
 }
