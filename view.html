@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portrait Gallery — Island Corporate Retreat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d1117;
+      color: #f5f5f5;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      padding: 32px 24px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    header h1 {
+      font-family: 'Bebas Neue', Arial, sans-serif;
+      font-size: 2.2rem;
+      letter-spacing: 0.06em;
+      color: #f5f5f5;
+    }
+    header p {
+      font-size: 0.8rem;
+      opacity: 0.45;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+    #photo-count {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 0.75rem;
+      opacity: 0.5;
+      letter-spacing: 0.08em;
+    }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .photo-card {
+      background: #16213e;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+    }
+    .photo-card img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      display: block;
+    }
+    .photo-card img:hover { opacity: 0.85; }
+    .photo-card footer {
+      padding: 8px 10px;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .dl-btn {
+      background: #e94560;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 6px 18px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: background 0.2s;
+      text-decoration: none;
+    }
+    .dl-btn:hover { background: #c73652; }
+
+    #status {
+      text-align: center;
+      padding: 60px 0;
+      font-size: 0.85rem;
+      opacity: 0.45;
+      letter-spacing: 0.08em;
+    }
+
+    /* Lightbox */
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #lightbox.open { display: flex; }
+    #lightbox img {
+      max-width: 100%;
+      max-height: 90vh;
+      border-radius: 10px;
+      box-shadow: 0 0 60px rgba(233,69,96,0.3);
+    }
+    #lightbox-close {
+      position: fixed;
+      top: 16px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 2rem;
+      cursor: pointer;
+      opacity: 0.7;
+      line-height: 1;
+    }
+    #lightbox-close:hover { opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Portrait Gallery</h1>
+    <p>Island Corporate Retreat &nbsp;·&nbsp; June 6, 2026</p>
+    <span id="photo-count"></span>
+  </header>
+
+  <div id="status">Loading…</div>
+  <div id="grid"></div>
+
+  <div id="lightbox">
+    <button id="lightbox-close">&#x2715;</button>
+    <img id="lightbox-img" src="" alt="" />
+  </div>
+
+  <script>
+    async function load() {
+      const status = document.getElementById('status');
+      const grid = document.getElementById('grid');
+      const count = document.getElementById('photo-count');
+
+      try {
+        const res = await fetch('/api/photos');
+        if (!res.ok) throw new Error(`Server error ${res.status}`);
+        const { photos } = await res.json();
+
+        status.remove();
+
+        if (photos.length === 0) {
+          grid.innerHTML = '<p style="text-align:center;opacity:.4;padding:60px 0;grid-column:1/-1">No portraits yet.</p>';
+          return;
+        }
+
+        count.textContent = `${photos.length} portrait${photos.length !== 1 ? 's' : ''}`;
+
+        for (const { url, key } of photos) {
+          const card = document.createElement('div');
+          card.className = 'photo-card';
+
+          const img = document.createElement('img');
+          img.src = url;
+          img.alt = 'Portrait';
+          img.loading = 'lazy';
+          img.addEventListener('click', () => openLightbox(url));
+
+          const footer = document.createElement('footer');
+          const btn = document.createElement('a');
+          btn.className = 'dl-btn';
+          btn.textContent = 'Download';
+          btn.href = `/api/download?key=${encodeURIComponent(key)}`;
+          btn.download = key.split('/').pop();
+
+          footer.appendChild(btn);
+          card.appendChild(img);
+          card.appendChild(footer);
+          grid.appendChild(card);
+        }
+      } catch (err) {
+        status.textContent = 'Failed to load photos.';
+        console.error(err);
+      }
+    }
+
+    function openLightbox(url) {
+      document.getElementById('lightbox-img').src = url;
+      document.getElementById('lightbox').classList.add('open');
+    }
+
+    document.getElementById('lightbox-close').addEventListener('click', () => {
+      document.getElementById('lightbox').classList.remove('open');
+      document.getElementById('lightbox-img').src = '';
+    });
+    document.getElementById('lightbox').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) {
+        e.currentTarget.classList.remove('open');
+        document.getElementById('lightbox-img').src = '';
+      }
+    });
+
+    load();
+  </script>
+</body>
+</html>

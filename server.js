@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, ListObjectsV2Command, GetObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -56,6 +56,46 @@ app.post('/upload', async (req, res) => {
   } catch (err) {
     console.error('S3 upload failed:', err);
     res.status(500).json({ error: 'Upload failed', detail: err.message });
+  }
+});
+
+// GET /view — gallery page
+app.get('/view', (req, res) => {
+  res.sendFile(join(__dirname, 'view.html'));
+});
+
+// GET /api/photos — list all portraits, newest first
+app.get('/api/photos', async (req, res) => {
+  try {
+    const result = await s3.send(new ListObjectsV2Command({
+      Bucket: BUCKET,
+      Prefix: 'portraits/',
+    }));
+    const photos = (result.Contents || [])
+      .sort((a, b) => b.LastModified - a.LastModified)
+      .map(obj => ({ url: `${PUBLIC_BASE_URL}/${obj.Key}`, key: obj.Key }));
+    res.json({ photos });
+  } catch (err) {
+    console.error('List failed:', err);
+    res.status(500).json({ error: 'Failed to list photos' });
+  }
+});
+
+// GET /api/download?key=portraits/xxx.png — proxy download from S3
+app.get('/api/download', async (req, res) => {
+  const key = req.query.key;
+  if (!key || !key.startsWith('portraits/')) {
+    return res.status(400).json({ error: 'Invalid key' });
+  }
+  try {
+    const result = await s3.send(new GetObjectCommand({ Bucket: BUCKET, Key: key }));
+    const filename = key.split('/').pop();
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    result.Body.pipe(res);
+  } catch (err) {
+    console.error('Download failed:', err);
+    res.status(500).json({ error: 'Download failed' });
   }
 });
 
